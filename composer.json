@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/Aplazame_Aplazame",
+    "type": "magento-module",
+    "license": "GNU-General-Public-License-(GPL)",
+    "homepage": "",
+    "description": "Modulo oficial de aplazame.com, medio de pago que permite pagos financiados integrado en el checkout de Magento.",
+    "authors": [
+    {
+        "name": "Daniel Molina",
+        "email": "dev@aplazame.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

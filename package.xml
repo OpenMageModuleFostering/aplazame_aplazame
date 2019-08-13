@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+    <name>Aplazame_Aplazame</name>
+    <version>0.2.0</version>
+    <stability>stable</stability>
+    <license uri="http://www.gnu.org/licenses/gpl-3.0.en.html">GNU General Public License (GPL)</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>Modulo oficial de aplazame.com, medio de pago que permite pagos financiados integrado en el checkout de Magento.</summary>
+    <description>Modulo oficial de aplazame.com, medio de pago que permite pagos financiados integrado en el checkout de Magento.</description>
+    <notes>&#x2022; Widget de aplazame en ficha de producto&#xD;
+&#x2022; Pasando country id para toma de decisiones seg&#xFA;n pa&#xED;s en API&#xD;
+&#x2022; Back to checkout&#xD;
+&#x2022; aplazame-js&#xD;
+&#x2022; Allow edit processing orders&#xD;
+&#x2022; Button Id config field&#xD;
+&#x2022; Payment method in order config field</notes>
+    <authors><author><name>Daniel Molina</name><user>aplazadev</user><email>dev@aplazame.com</email></author><author><name>Oscar Reales</name><user>oscarreales</user><email>oreales@gmail.com</email></author></authors>
+    <date>2015-09-21</date>
+    <time>17:37:13</time>
+    <contents><target name="magecommunity"><dir name="Aplazame"><dir name="Aplazame"><dir name="Block"><dir name="Checkout"><dir name="Onepage"><file name="Billing.php" hash="d908bf39c8555f436f8841ff30b520f1"/><file name="Shipping.php" hash="8968979cc9140f2f6236ee9f2fbafc98"/></dir></dir><dir name="Payment"><file name="Form.php" hash="d23f592da9ed9ac11b4432f49c2783ac"/><file name="Info.php" hash="eeadafff816256593595d261c9e3b5f8"/><file name="Redirect.php" hash="9cbc88587076d51f187d0ad546258768"/></dir><dir name="Product"><file name="Widget.php" hash="38bdd716a24f62e81dc21c336fb4ea8d"/></dir></dir><dir name="Helper"><file name="Cart.php" hash="6defc39a6e7d125171e177cf6b63c4da"/><file name="Data.php" hash="e738ff35f7bd1a6c8ff7f0f87adfa996"/></dir><dir name="Model"><dir name="Api"><file name="Client.php" hash="2747d7d6317ed83868ea48740008b86c"/><file name="Serializers.php" hash="450e490ea33aad7077a7de623f872ea9"/></dir><file name="Config.php" hash="67254d968ff5a0a95c73484cc13efb33"/><file name="Observer.php" hash="27c58b8acf0a7974f808ff9d3408df34"/><file name="Payment.php" hash="c4e9ebd170f09d3808b7ba772e28a1e7"/></dir><dir name="controllers"><file name="PaymentController.php" hash="750453b9d9fbeb2565e1fae3fd360d07"/></dir><dir name="etc"><file name="config.xml" hash="df630f2da7172f99a3fb4b17c3df9723"/><file name="system.xml" hash="e34dc1a4aa6eae2cc62387cbefbd3bb9"/></dir></dir></dir></target><target name="magelib"><dir name="Aplazame"><dir name="Aplazame"><file name="Util.php" hash="039c093cbf8c1859cd7e159829ec8e82"/></dir><file name="Aplazame.php" hash="e67f083f4079693da19cd634d7e5bae9"/></dir></target><target name="mageetc"><dir name="modules"><file name="Aplazame_Aplazame.xml" hash="d816c618a1829401ca0314c3406482a1"/></dir></target><target name="magedesign"><dir name="frontend"><dir name="base"><dir name="default"><dir name="layout"><file name="aplazame.xml" hash="ae3b3f04f5cf58af1b6021f1b22537f5"/></dir><dir name="template"><dir name="aplazame"><dir name="payment"><file name="common.phtml" hash="cdcc83ab18a52dff8c588fadb06c3c51"/><file name="form.phtml" hash="47d03cc30037d3136790a7e88942c8b9"/></dir><dir name="product"><file name="widget.phtml" hash="ec0f6ad739b26226e04a7a4e864bf90a"/></dir><file name=".DS_Store" hash="c49b1b40bbdb1fc5487a5ff1436a733d"/></dir></dir></dir></dir></dir></target></contents>
+    <compatible/>
+    <dependencies><required><php><min>5.2.0</min><max>6.0.0</max></php></required></dependencies>
+</package>

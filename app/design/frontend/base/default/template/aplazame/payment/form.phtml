@@ -1,0 +1,22 @@
+<fieldset class="form-list">
+  <?php $_code=$this->getMethodCode() ?>
+</fieldset>
+
+<div data-aplazame-payment-info="">
+  <div id="payment_form_<?php echo $_code ?>" style="display:none;">
+      <p class="aplazame_title" style="padding-left: 20px; padding-top: 8px;">
+        Aplaza o fracciona tu compra con <a href="https://aplazame.com" target="_blank">Aplazame</a>.<br>
+        Obtén financiación al instante sólo con tu Nombre y Apellidos, DNI/NIE, Teléfono y tarjeta de débito o crédito.<br>
+        Sin comisiones ocultas ni letra pequeña.<br>
+      </p>
+  </div>
+</div>
+
+<script>
+aplazame.button({
+  selector: "<?php echo Mage::getStoreConfig('payment/aplazame/button') ?>",
+  amount: <?php echo $this->getTotal() ?>,
+  currency: "EUR",
+  country: "<?php echo $this->getCountry(); ?>"
+});
+</script>
