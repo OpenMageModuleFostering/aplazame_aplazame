@@ -56,7 +56,12 @@ class Aplazame_Aplazame_PaymentController extends Mage_Core_Controller_Front_Act
         if ($session->getLastRealOrderId()) {
             /** @var Mage_Sales_Model_Order $order */
             $order = Mage::getModel('sales/order')->loadByIncrementId($session->getLastRealOrderId());
-            $order->getPayment()->getMethodInstance()->processConfirmOrder($order, $checkout_token);
+            $payment = $order->getPayment()->getMethodInstance();
+            if (!$payment instanceof Aplazame_Aplazame_Model_Payment) {
+                Mage::throwException($this->__('Unexpected payment method.'));
+            }
+
+            $payment->processConfirmOrder($order, $checkout_token);
 
             // TODO: add a boolean configuration option
             $order->sendNewOrderEmail();
@@ -68,6 +73,11 @@ class Aplazame_Aplazame_PaymentController extends Mage_Core_Controller_Front_Act
 
     public function cancelAction()
     {
+        $this->_redirectUrl(Mage::getUrl('aplazame/payment/cart'));
+    }
+
+    public function cartAction()
+    {
         $session = $this->_getCheckoutSession();
         $orderId = $session->getLastRealOrderId();
 
@@ -75,7 +85,9 @@ class Aplazame_Aplazame_PaymentController extends Mage_Core_Controller_Front_Act
             /** @var Mage_Sales_Model_Order $order */
             $order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
             if ($order->getId() && $order->getState() === Mage_Sales_Model_Order::STATE_NEW) {
-                Mage::helper('aplazame/cart')->resuscitateCartFromOrder($order, $this);
+                /** @var Aplazame_Aplazame_Helper_Cart $cart */
+                $cart = Mage::helper('aplazame/cart');
+                $cart->resuscitateCartFromOrder($order, $this);
             }
         }
 
@@ -93,6 +105,10 @@ class Aplazame_Aplazame_PaymentController extends Mage_Core_Controller_Front_Act
         /** @var Mage_Sales_Model_Order $order */
         $order = Mage::getModel('sales/order')->loadByIncrementId($checkout_token);
         $payment = $order->getPayment()->getMethodInstance();
+        if (!$payment instanceof Aplazame_Aplazame_Model_Payment) {
+            Mage::throwException($this->__('Unexpected payment method.'));
+        }
+
         $code = Aplazame_Aplazame_Model_Payment::METHOD_CODE;
 
         if (!$payment or $code !== $payment->getCode()) {
@@ -103,9 +119,15 @@ class Aplazame_Aplazame_PaymentController extends Mage_Core_Controller_Front_Act
             Mage::throwException($this->__('You don\'t have permissions.'));
         }
 
-        $result = $payment->processHistory($order, $checkout_token);
+        /** @var Mage_Sales_Model_Order[] $history_collection */
+        $history_collection = Mage::getModel('sales/order')
+            ->getCollection()
+            ->addAttributeToFilter('customer_id', array('like'=> $order->getCustomerId()))
+        ;
+
+        $historyOrders = array_map(array('Aplazame_Aplazame_Api_BusinessModel_HistoricalOrder', 'createFromOrder'), $history_collection);
 
         $this->getResponse()->setHeader('Content-type', 'application/json');
-        $this->getResponse()->setBody($result);
+        $this->getResponse()->setBody(json_encode(Aplazame_Sdk_Serializer_JsonSerializer::serializeValue($historyOrders)));
     }
 }

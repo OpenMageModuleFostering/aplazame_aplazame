@@ -12,46 +12,9 @@ class Aplazame_Aplazame_Model_Observer extends Mage_Core_Model_Abstract
         $code = Aplazame_Aplazame_Model_Payment::METHOD_CODE;
 
         /** @var Mage_Sales_Model_Order $parentOrder */
-        $parentOrder = Mage::getModel('sales/order')->loadByIncrementId(
-            (int)$order->getIncrementId());
+        $parentOrder = Mage::getModel('sales/order')->loadByIncrementId($order->getIncrementId());
 
         return ($code == $parentOrder->getPayment()->getMethod());
-    }
-
-    /**
-     * Method for updating the order status after completing a purchase
-     */
-    public function salesOrderPlaceAfter($observer)
-    {
-        /** @var Mage_Sales_Model_Order|null $order */
-        $order = $observer->getOrder();
-
-        if (!isset($order)) {
-            return $this;
-        }
-
-        $payment = $order->getPayment();
-        if (!$payment) {
-            return $this;
-        }
-
-        if (!$this->is_aplazame_payment($order)) {
-            return $this;
-        }
-
-        /** @var Aplazame_Aplazame_Model_Api_Client $client */
-        $client = Mage::getModel('aplazame/api_client');
-        $client->updateOrder($order);
-
-        return $this;
-    }
-
-    /**
-     * Method after load order edition
-     */
-    public function salesOrderLoadAfter($observer)
-    {
-        return $this;
     }
 
     /**
@@ -84,8 +47,8 @@ class Aplazame_Aplazame_Model_Observer extends Mage_Core_Model_Abstract
         $client = Mage::getModel('aplazame/api_client');
         try {
             $client->cancelOrder($order);
-        } catch (Mage_Core_Exception $e) {
-            if ($e->getMessage() === 'Aplazame error code 404: Not found') {
+        } catch (Aplazame_Sdk_Api_ApiClientException $e) {
+            if ($e->getStatusCode() == 404) {
                 return $this;
             }
 
