@@ -61,19 +61,19 @@ class Aplazame_Aplazame_Model_Observer extends Mage_Core_Model_Abstract
      */
     public function salesOrderPaymentCancel($observer)
     {
-        $code = Aplazame_Aplazame_Model_Payment::METHOD_CODE;
-
         /** @var Mage_Sales_Model_Order|null $order */
         $order = $observer->getOrder();
 
         $orderId = explode("-", $order->getIncrementId());
+        if (isset($orderId[1])) {
+            /** @var Mage_Sales_Model_Order $nextOrder */
+            $nextOrder = Mage::getModel('sales/order')->loadByIncrementId(
+                $orderId[0] . '-' . ((int)$orderId[1] + 1)
+            );
 
-        /** @var Mage_Sales_Model_Order $nextOrder */
-        $nextOrder = Mage::getModel('sales/order')->loadByIncrementId(
-            $orderId[0] . '-' . ((int)$orderId[1] + 1));
-
-        if ($nextOrder->getId()) {
-            return $this;
+            if ($nextOrder->getId()) {
+                return $this;
+            }
         }
 
         if (!$this->is_aplazame_payment($order)) {
@@ -82,13 +82,21 @@ class Aplazame_Aplazame_Model_Observer extends Mage_Core_Model_Abstract
 
         /** @var Aplazame_Aplazame_Model_Api_Client $client */
         $client = Mage::getModel('aplazame/api_client');
-        $client->cancelOrder($order);
+        try {
+            $client->cancelOrder($order);
+        } catch (Mage_Core_Exception $e) {
+            if ($e->getMessage() === 'Aplazame error code 404: Not found') {
+                return $this;
+            }
+
+            throw $e;
+        }
 
         return $this;
     }
 
     /**
-     * Method to send a parcial (refund) or total (cancel) refund to aplazame when a creditmemo is created
+     * Method to send a partial (refund) or total (cancel) refund to aplazame when a creditmemo is created
      *
      * @param Varien_Event_Observer $observer
      * @return $this

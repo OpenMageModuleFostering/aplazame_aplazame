@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Aplazame_Aplazame>
-            <version>0.2.2</version>
+            <version>0.3.2</version>
         </Aplazame_Aplazame>
     </modules>
     <global>
@@ -28,7 +28,36 @@
             </aplazame>
         </helpers>
     </global>
+
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Aplazame_Aplazame after="Mage_Adminhtml">Aplazame_Aplazame_AdminHtml</Aplazame_Aplazame>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+
     <adminhtml>
+        <layout>
+            <updates>
+                <aplazame>
+                    <file>aplazame.xml</file>
+                </aplazame>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Aplazame_Aplazame>
+                    <files>
+                        <default>Aplazame_Aplazame.csv</default>
+                    </files>
+                </Aplazame_Aplazame>
+            </modules>
+        </translate>
         <events>
             <sales_order_place_after>
                 <observers>
@@ -66,6 +95,20 @@
                     </Aplazame>
                 </observers>
             </sales_order_payment_refund>
+            <core_block_abstract_prepare_layout_after>
+                <observers>
+                    <campaignsMassActions>
+                        <type>singleton</type>
+                        <class>aplazame/campaignsObserver</class>
+                        <method>campaignsMassActions</method>
+                    </campaignsMassActions>
+                    <productCampaigns>
+                        <type>singleton</type>
+                        <class>aplazame/campaignsObserver</class>
+                        <method>productCampaigns</method>
+                    </productCampaigns>
+                </observers>
+            </core_block_abstract_prepare_layout_after>
         </events>
     </adminhtml>
 

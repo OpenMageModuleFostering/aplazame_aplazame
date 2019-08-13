@@ -86,7 +86,7 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
                 "name"=>$order->getShippingMethod()
             ));
 
-            if ($order->getShippingAmount()) {
+            if ($order->getShippingAmount() > 0) {
                 $shipping["tax_rate"] = 100 * $order->getShippingTaxAmount() / $order->getShippingAmount();
             }
         }
@@ -109,17 +109,16 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
     protected function getArticles($order)
     {
         $articles = array();
-        $products = Mage::getModel('catalog/product');
 
         /** @var Mage_Sales_Model_Order_Item $order_item */
         foreach ($order->getAllVisibleItems() as $order_item) {
             $productId = $order_item->getProductId();
             /** @var Mage_Catalog_Model_Product $product */
-            $product = $products->load($productId);
+            $product = Mage::getModel('catalog/product')->load($productId);
             $discounts = $product->getPrice() - $product->getFinalPrice();
 
             $articles[] = array(
-                "id" => $order_item->getId(),
+                "id" => $productId,
                 "sku" => $order_item->getSku(),
                 "name" => $order_item->getName(),
                 "description" => substr($product->getDescription(), 0, 255),
