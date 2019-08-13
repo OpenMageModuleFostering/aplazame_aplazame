@@ -21,21 +21,10 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
         );
     }
 
-    private function _orderTotal()
-    {
-        return $this->getOrder()->getTotalDue();
-    }
-
-    public function getInvoiceFeeIncludeTax()
-    {
-        return $this->getTotal()->getAddress()->getInvoiceFee();
-    }
-
-    public function getInvoiceFeeExcludeTax()
-    {
-        return $this->getTotal()->getAddress()->getInvoiceFeeExcludedVat();
-    }
-
+    /**
+     * @param Mage_Sales_Model_Order_Address $addr
+     * @return array
+     */
     protected function _getAddr($addr)
     {
         return array(
@@ -51,10 +40,15 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
             "postcode" => $addr->getPostcode());
     }
 
-    protected function getCustomer()
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @return array
+     */
+    protected function getCustomer($order)
     {
+        /** @var Mage_Customer_Model_Customer $customer */
         $customer = Mage::getSingleton('customer/session')->getCustomer();
-        $logCustomer = Mage::getModel('log/customer')->loadByCustomer($customer);
+        $logCustomer = Mage::getModel('log/customer')->load($customer->getId());
         $customer_serializer = array("gender"=>0);
 
         if ($customer->getId()) {
@@ -67,8 +61,6 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
                 "date_joined"=>date(DATE_ISO8601, $customer->getCreatedAtTimestamp()),
                 "last_login"=>date(DATE_ISO8601, $logCustomer->getLoginAtTimestamp())));
         } else {
-            $order = $this->getOrder();
-
             $customer_serializer = array_merge($customer_serializer, array(
                 "type"=>"g",
                 "email"=>$order->getCustomerEmail(),
@@ -79,18 +71,24 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
         return $customer_serializer;
     }
 
-    protected function getShipping()
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @return array
+     */
+    protected function getShipping($order)
     {
-        $order = $this->getOrder();
         $shipping = null;
         $shipping_address = $order->getShippingAddress();
 
         if ($shipping_address) {
             $shipping = array_merge($this->_getAddr($shipping_address), array(
-                "price"=> static::formatDecimals($order->getShippingAmount()),
-                "tax_rate"=>static::formatDecimals(100 * $order->getShippingTaxAmount() / $order->getShippingAmount()),
+                "price"=> self::formatDecimals($order->getShippingAmount()),
                 "name"=>$order->getShippingMethod()
             ));
+
+            if ($order->getShippingAmount()) {
+                $shipping["tax_rate"] = 100 * $order->getShippingTaxAmount() / $order->getShippingAmount();
+            }
         }
 
         return $shipping;
@@ -104,14 +102,19 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
         return Mage::getSingleton('tax/calculation')->getRate($request->setProductClassId($taxclassid));
     }
 
-    protected function getArticles()
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @return array
+     */
+    protected function getArticles($order)
     {
-        $order = $this->getOrder();
         $articles = array();
         $products = Mage::getModel('catalog/product');
 
+        /** @var Mage_Sales_Model_Order_Item $order_item */
         foreach ($order->getAllVisibleItems() as $order_item) {
             $productId = $order_item->getProductId();
+            /** @var Mage_Catalog_Model_Product $product */
             $product = $products->load($productId);
             $discounts = $product->getPrice() - $product->getFinalPrice();
 
@@ -123,17 +126,20 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
                 "url" =>$product->getProductUrl(),
                 "image_url" => $product->getImageUrl(),
                 "quantity" => intval($order_item->getQtyOrdered()),
-                "price" => static::formatDecimals($order_item->getPrice() + $discounts),
-                "tax_rate" => static::formatDecimals($this->getProductTaxRate($product)),
-                "discount" => static::formatDecimals($discounts));
+                "price" => self::formatDecimals($order_item->getPrice() + $discounts),
+                "tax_rate" => self::formatDecimals($this->getProductTaxRate($product)),
+                "discount" => self::formatDecimals($discounts));
         }
 
         return $articles;
     }
 
-    protected function getRenderOrder()
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @return array
+     */
+    protected function getRenderOrder($order)
     {
-        $order = $this->getOrder();
         $discounts = $order->getDiscountAmount();
 
         if (is_null($discounts)) {
@@ -142,16 +148,20 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
 
         return array(
             "id"=>$order->getIncrementId(),
-            "articles"=>$this->getArticles(),
+            "articles"=>$this->getArticles($order),
             "currency"=>$order->getOrderCurrencyCode(),
-            "tax_amount"=>static::formatDecimals($order->getTaxAmount()),
-            "total_amount"=>static::formatDecimals($this->_orderTotal()),
-            "discount"=>-static::formatDecimals($discounts));
+            "tax_amount"=>self::formatDecimals($order->getTaxAmount()),
+            "total_amount"=>self::formatDecimals($order->getTotalDue()),
+            "discount"=>-self::formatDecimals($discounts));
     }
 
-    public function getHistory()
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @return array
+     */
+    public function getHistory($order)
     {
-        $order = $this->getOrder();
+        /** @var Mage_Sales_Model_Order[] $history_collection */
         $history_collection = Mage::getModel('sales/order')
             ->getCollection()
             ->addAttributeToFilter('customer_id', array('like'=>$order->getCustomerId()));
@@ -160,8 +170,8 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
         foreach ($history_collection as $order_history) {
             $history[] = array(
                 "id"=>$order_history->getIncrementId(),
-                "amount"=>static::formatDecimals($order_history->getGrandTotal()),
-                "due"=>static::formatDecimals($order_history->getTotalDue()),
+                "amount"=>self::formatDecimals($order_history->getGrandTotal()),
+                "due"=>self::formatDecimals($order_history->getTotalDue()),
                 "status"=>$order_history->getStatus(),
                 "type"=>$order_history->getPayment()->getMethodInstance()->getCode(),
                 "order_date"=>date(DATE_ISO8601, strtotime($order_history->getCreatedAt())),
@@ -173,35 +183,40 @@ class Aplazame_Aplazame_Model_Api_Serializers extends Varien_Object
         return $history;
     }
 
-    public function getOrderUpdate()
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @return array
+     */
+    public function getOrderUpdate($order)
     {
-        $order = $this->getOrder();
-
         return array(
-            "order"=>$this->getRenderOrder(),
+            "order"=>$this->getRenderOrder($order),
             "billing"=>$this->_getAddr($order->getBillingAddress()),
             "shipping"=>$this->getShipping($order),
-            "meta"=>static::_getMetadata());
+            "meta"=>self::_getMetadata());
     }
 
-    public function getCheckout()
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @return array
+     */
+    public function getCheckout($order)
     {
-        $order = $this->getOrder();
         $info = $this->getInfoInstance();
 
         $merchant = array(
-            "confirmation_url"=>Mage::getUrl("aplazame/payment/confirm"),
-            "cancel_url"=>Mage::getUrl('aplazame/payment/cancel') . '?status=error',
-            "checkout_url"=>Mage::getUrl('aplazame/payment/cancel'),
-            "success_url"=>Mage::getUrl('checkout/onepage/success'));
+            "confirmation_url"=>Mage::getUrl("aplazame/payment/confirm", array('_secure'=>true)),
+            "cancel_url"=>Mage::getUrl('aplazame/payment/cancel', array('_secure'=>true)) . '?status=error',
+            "checkout_url"=>Mage::getUrl('aplazame/payment/cancel', array('_secure'=>true)),
+            "success_url"=>Mage::getUrl('checkout/onepage/success', array('_secure'=>true)));
 
         return array(
             "toc"=>true,
             "merchant"=>$merchant,
-            "customer"=>$this->getCustomer(),
-            "order"=>$this->getRenderOrder(),
+            "customer"=>$this->getCustomer($order),
+            "order"=>$this->getRenderOrder($order),
             "billing"=>$this->_getAddr($order->getBillingAddress()),
             "shipping"=>$this->getShipping($order),
-            "meta"=>static::_getMetadata());
+            "meta"=>self::_getMetadata());
     }
 }

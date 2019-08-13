@@ -1,12 +1,12 @@
 {
     "name": "OpenMageModuleFostering/Aplazame_Aplazame",
     "type": "magento-module",
-    "license": "GNU-General-Public-License-(GPL)",
+    "license": "GPL",
     "homepage": "",
-    "description": "Modulo oficial de aplazame.com, medio de pago que permite pagos financiados integrado en el checkout de Magento.",
+    "description": "Aplazame, a consumer credit company, offers a payment system that can be used by online buyers to receive funding for their purchases.",
     "authors": [
     {
-        "name": "Daniel Molina",
+        "name": "Aplazame",
         "email": "dev@aplazame.com"
     }
 ],
