@@ -3,14 +3,20 @@
 class Aplazame_Aplazame_Model_Api_Client extends Varien_Object
 {
     /**
+     * @var string
+     */
+    public $apiBaseUri;
+
+    /**
      * @var Aplazame_Sdk_Api_Client
      */
     public $apiClient;
 
     public function __construct()
     {
+        $this->apiBaseUri = getenv('APLAZAME_API_BASE_URI') ? getenv('APLAZAME_API_BASE_URI') : 'https://api.aplazame.com';
         $this->apiClient = new Aplazame_Sdk_Api_Client(
-            getenv('APLAZAME_API_BASE_URI') ? getenv('APLAZAME_API_BASE_URI') : 'https://api.aplazame.com',
+            $this->apiBaseUri,
             (Mage::getStoreConfig('payment/aplazame/sandbox') ? Aplazame_Sdk_Api_Client::ENVIRONMENT_SANDBOX : Aplazame_Sdk_Api_Client::ENVIRONMENT_PRODUCTION),
             Mage::getStoreConfig('payment/aplazame/secret_api_key'),
             new Aplazame_Aplazame_Http_ZendClient()
@@ -23,7 +29,7 @@ class Aplazame_Aplazame_Model_Api_Client extends Varien_Object
      */
     public function authorize($orderId)
     {
-        return $this->apiClient->request(Varien_Http_Client::POST, '/orders/' . $orderId . "/authorize");
+        return $this->apiClient->request(Varien_Http_Client::POST, '/orders/' . urlencode(urlencode($orderId)) . '/authorize');
     }
 
     /**
@@ -32,7 +38,7 @@ class Aplazame_Aplazame_Model_Api_Client extends Varien_Object
      */
     public function fetchOrder($orderId)
     {
-        $orders = $this->apiClient->request(Varien_Http_Client::GET, '/orders?mid=' . $orderId);
+        $orders = $this->apiClient->request(Varien_Http_Client::GET, '/orders?mid=' . urlencode($orderId));
 
         return $orders['results'][0];
     }
@@ -66,6 +72,6 @@ class Aplazame_Aplazame_Model_Api_Client extends Varien_Object
      */
     protected function getEndpointForOrder($order)
     {
-        return '/orders/' . $order->getIncrementId();
+        return '/orders/' . urlencode(urlencode($order->getIncrementId()));
     }
 }
