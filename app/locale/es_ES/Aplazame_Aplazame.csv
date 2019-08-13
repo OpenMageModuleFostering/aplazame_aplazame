@@ -1,7 +1,7 @@
+"Test Mode (Sandbox)","Modo de Pruebas (Sandbox)"
 "Private API Key","Clave API privada"
 "Public API Key","Clave API pública"
 "Aplazame Button CSS Selector","Selector CSS del botón de Aplazame"
-"Aplazame Button Image","Imagen del botón de Aplazame"
 "Automatic invoice generation","Facturar automáticamente"
 "Applicable only if the payment was successful.","Genera factura si el pago es correcto."
 "Authentication header format is invalid.","La cabecera Authentication es inválida."
@@ -22,3 +22,4 @@
 "Aplazame Campaigns","Campañas Aplazame"
 "Associate products to selected campaigns","Asociar productos a las campañas seleccionadas"
 "Remove products from selected campaigns","Eliminar productos de las campañas seleccionadas"
+"The campaign applies to all products from your catalogue","La campaña aplica a todo el catálogo de productos"
