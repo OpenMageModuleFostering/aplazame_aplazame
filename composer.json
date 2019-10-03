@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/Aplazame_Aplazame",
+    "name": "OpenMageModuleFostering\/Aplazame_Aplazame",
     "type": "magento-module",
     "license": "GPL",
     "homepage": "",
     "description": "Aplazame, a consumer credit company, offers a payment system that can be used by online buyers to receive funding for their purchases.",
     "authors": [
-    {
-        "name": "Aplazame",
-        "email": "dev@aplazame.com"
-    }
-],
+        {
+            "name": "Aplazame",
+            "email": "dev@aplazame.com"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
